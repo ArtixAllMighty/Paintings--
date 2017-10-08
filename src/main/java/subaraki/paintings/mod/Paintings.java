@@ -1,29 +1,29 @@
 package subaraki.paintings.mod;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Collections;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.entity.item.EntityPainting;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.ModMetadata;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.Logger;
 import subaraki.paintings.config.ConfigurationHandler;
-import subaraki.paintings.mod.client.RenderPaintingLate;
 import subaraki.paintings.mod.server.proxy.CommonProxy;
 
+/**
+ *  TODO:
+ *
+ *  The server needs to be the authority on what template is in use.
+ *      The client needs to generate paintings on connect. -- This might make per-server configurations possible.
+ *  The server needs to be able to accept arbitrary painting enums and add them dynamically.
+ */
 
 @Mod(modid = Paintings.MODID, name = Paintings.NAME, version = Paintings.VERSION, dependencies = "after:PaintingSelGui")
 public class Paintings {
@@ -35,8 +35,6 @@ public class Paintings {
     @SidedProxy(serverSide = "subaraki.paintings.mod.server.proxy.CommonProxy", clientSide = "subaraki.paintings.mod.client.proxy.ClientProxy")
     public static CommonProxy proxy;
     public static Logger log;
-
-    private static final String CLASS_LOC = "com.mcf.davidee.paintinggui.gui.PaintingButton";
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -51,54 +49,28 @@ public class Paintings {
 
         ConfigurationHandler.instance.loadConfig(event.getSuggestedConfigurationFile());
 
-        loadPatternDefinition();
+        proxy.loadPatternDefinition();
         proxy.registerRenderInformation();
     }
 
-    private void loadPatternDefinition() {
-        try {
-            // Open a reader to the pattern
-            ResourceLocation loc = new ResourceLocation("subaraki:patterns/" + ConfigurationHandler.instance.texture + ".json");
-            InputStream in = Minecraft.getMinecraft().getResourceManager().getResource(loc).getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+    private PaintingsEventHandler eventHandler = new PaintingsEventHandler();
+    private class PaintingsEventHandler {
 
-            // Read the JSON into a loader object
-            Gson gson = new Gson();
-            JsonElement je = gson.fromJson(reader, JsonElement.class);
-            JsonObject json = je.getAsJsonObject();
-
-            // Rebuild painting list in EnumArt
-            PaintingsPattern.instance = gson.fromJson(json, PaintingsPattern.class);
-            PaintingsIgnore.ignoreVanillaPaintings();
-            PaintingsPattern.instance.loadPatterns();
-
-        } catch (IOException e) {
-            Paintings.log.warn(e.getLocalizedMessage());
+        @SubscribeEvent
+        public void entityConstructingEvent(EntityConstructing event) {
+            // We only care about paintings
+            if (event.getEntity() instanceof EntityPainting) {
+                EntityPainting entity = (EntityPainting)event.getEntity();
+                entity.art = EntityPainting.EnumArt.values()[0];
+            }
         }
 
-        // Replace texture used by Painting Gui Selection Revamped
-        try {
-            Class altClass = Class.forName(CLASS_LOC);
-            paintingGuiTextureHelper(altClass, "TEXTURE", new ResourceLocation("subaraki:art/" + ConfigurationHandler.instance.texture + ".png"));
-            paintingGuiHelper(altClass, "KZ_WIDTH", PaintingsPattern.instance.getSize().width * 16);
-            paintingGuiHelper(altClass, "KZ_HEIGHT", PaintingsPattern.instance.getSize().height * 16);
-        } catch (Exception e) {
-            Paintings.log.warn(e.getLocalizedMessage());
+        @SubscribeEvent
+        public void entityJoinWorldEvent(EntityJoinWorldEvent event) {
+            // We only care about paintings
+            if (event.getEntity() instanceof EntityPainting) {
+                log.info(event);
+            }
         }
-    }
-
-    private void paintingGuiHelper(Class c, String field, int value)
-            throws Exception {
-        Field f = c.getField(field);
-        f.setAccessible(true);
-        f.set(null, value);
-    }
-
-    private void paintingGuiTextureHelper(Class c, String field, ResourceLocation loc)
-            throws Exception {
-        Field f = c.getField(field);
-        f.setAccessible(true);
-        f.set(null, loc);
     }
 }
-

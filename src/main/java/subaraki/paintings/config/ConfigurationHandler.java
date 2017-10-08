@@ -3,7 +3,6 @@ package subaraki.paintings.config;
 import java.io.File;
 
 import net.minecraftforge.common.config.Configuration;
-import subaraki.paintings.mod.PaintingsPattern;
 
 public class ConfigurationHandler {
     public static ConfigurationHandler instance = new ConfigurationHandler();
@@ -17,7 +16,7 @@ public class ConfigurationHandler {
     }
 
     private void loadSettings(Configuration config) {
-        config.addCustomCategoryComment("Painting Mode", "The layout pattern of your art texture. Built-in patterns include gibea, sphax, insane, tinypics, mediumpics, new_insane, and massive. Use of a custom pattern is possible by including a JSON file in your ");
+        config.addCustomCategoryComment("Painting Mode", "The layout pattern of your paintings texture. Built-in patterns include gibea, sphax, insane, tinypics, mediumpics, new_insane, and massive. See the online documentation for information on custom templates.");
 
         this.texture = config.getString("name", "Painting Mode", "gibea", "Texture").toLowerCase();
     }

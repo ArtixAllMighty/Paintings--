@@ -28,12 +28,19 @@ public class PaintingsPattern {
     private String name = null;
     private String[] pattern = null;
     private HashMap<String, Size> key = null;
+    private HashMap<Size, Number> sizeCounts = new HashMap<Size, Number>();
 
     public void loadPatterns() {
         Integer width = this.pattern[0].length();
         Integer height = this.pattern.length;
         Integer count = 0;
 
+        // Initialize counters
+        for (Size size : key.values()) {
+            this.sizeCounts.put(size, 0);
+        }
+
+        // Iterate through symbols
         for (int offsetY = 0; offsetY < height; offsetY++) {
             for (int offsetX = 0; offsetX < width; offsetX++) {
                 String symbol = this.pattern[offsetY].substring(offsetX, offsetX + 1);
@@ -44,20 +51,23 @@ public class PaintingsPattern {
 
                 Size size = this.key.get(symbol);
                 if (size != null) {
-                    this.addPatternSection(size.width, size.height, offsetX, offsetY);
-                    this.updatePattern(size.width, size.height, offsetX, offsetY);
+                    this.addPainting(size, offsetX, offsetY);
+                    this.markPaintingAdded(size, offsetX, offsetY);
                     count++;
                 } else {
-                    StringBuilder error = new StringBuilder();
-                    error.append(String.format("Error processing pattern at offset: %d, %d\n", offsetX, offsetY));
-                    Paintings.log.error(error);
+                    Paintings.log.error(String.format("Error processing pattern at offset: %d, %d\n", offsetX, offsetY));
                 }
             }
         }
 
         Paintings.log.info(String.format("%d paintings found in %s/%s.", count, this.type, this.name));
+        Paintings.log.info(this.sizeCounts.toString());
     }
 
+    /**
+     * Get the size of the entire texture
+     * @return Size of textures, in blocks
+     */
     public Size getSize() {
         return new Size(
                 this.pattern[0].length(),
@@ -66,42 +76,41 @@ public class PaintingsPattern {
     }
 
     /**
-     * Append the art enum with the painting specification
-     *
-     * @param sizeX   Width in blocks
-     * @param sizeY   Height in blocks
+     * Add a painting to Minecract from the pattern
+     * @param size    Size in blocks
      * @param offsetX Left offset in blocks
      * @param offsetY Top offset in blocks
      */
-    private void addPatternSection(Integer sizeX, Integer sizeY, Integer offsetX, Integer offsetY) {
+    private void addPainting(Size size, Integer offsetX, Integer offsetY) {
+
+        Number sizeCount = this.sizeCounts.get(size);
+        this.sizeCounts.put(size, sizeCount.intValue() + 1);
 
         EnumHelper.addArt(
                 String.format("EnumArt_%d", PaintingsPattern.enumCounter++),
-                String.format("ptg%3d%3d", offsetX, offsetY),
-                sizeX * 16,
-                sizeY * 16,
+                String.format("ptg_%d_%d_%d", size.width, size.height, sizeCount.intValue()),
+                size.width * 16,
+                size.height * 16,
                 offsetX * 16,
                 offsetY * 16
         );
-        Paintings.log.debug(String.format("Added %d x %d painting at %d, %d.", sizeX, sizeY, offsetX, offsetY));
+        Paintings.log.info(String.format("Added %s painting at [%d,%d].", size, offsetX, offsetY));
     }
 
     /**
-     * Remove (replace with ' ') a region of the pattern, used to remove a read-in painting
-     *
-     * @param sizeX   Width in blocks
-     * @param sizeY   Height in blocks
+     * Remove a painting from the pattern
+     * @param size    Size in blocks
      * @param offsetX Left offset in blocks
      * @param offsetY Top offset in blocks
      */
-    private void updatePattern(Integer sizeX, Integer sizeY, Integer offsetX, Integer offsetY) {
-        if (this.pattern[offsetY].length() < offsetX + sizeX) {
+    private void markPaintingAdded(Size size, Integer offsetX, Integer offsetY) {
+        if (this.pattern[offsetY].length() < offsetX + size.width) {
             Paintings.log.warn("Added painting extends beyond pattern dimensions.");
         }
 
-        for (int row = offsetY; row < offsetY + sizeY; row++) {
+        for (int row = offsetY; row < offsetY + size.height; row++) {
             byte[] rowBytes = this.pattern[row].getBytes();
-            for (int column = offsetX; column < offsetX + sizeX; column++) {
+            for (int column = offsetX; column < offsetX + size.width; column++) {
                 rowBytes[column] = ' ';
             }
             this.pattern[row] = new String(rowBytes);
@@ -109,10 +118,9 @@ public class PaintingsPattern {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Pattern: " + this.type + "/" + this.name + "\n");
-        for (int i = 0; i < this.pattern.length; i++) {
-            sb.append(String.format("    %s\n", this.pattern[i]));
+        StringBuilder sb = new StringBuilder("Pattern: " + this.type + "/" + this.name + "\n");
+        for (String s : this.pattern) {
+            sb.append(String.format("    %s\n", s));
         }
         sb.append(String.format("Key:\n    %s", this.key.toString()));
 
