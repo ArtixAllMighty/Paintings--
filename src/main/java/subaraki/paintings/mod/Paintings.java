@@ -1,29 +1,23 @@
 package subaraki.paintings.mod;
 
-import java.util.Collections;
-
 import net.minecraft.entity.item.EntityPainting;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.ModMetadata;
-import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import subaraki.paintings.config.ConfigurationHandler;
-import subaraki.paintings.mod.server.proxy.CommonProxy;
+import subaraki.paintings.mod.client.RenderPaintingLate;
+import subaraki.paintings.mod.network.PaintingsChannel;
 
-/**
- *  TODO:
- *
- *  The server needs to be the authority on what template is in use.
- *      The client needs to generate paintings on connect. -- This might make per-server configurations possible.
- *  The server needs to be able to accept arbitrary painting enums and add them dynamically.
- */
+import java.io.File;
+import java.util.Collections;
+
 
 @Mod(modid = Paintings.MODID, name = Paintings.NAME, version = Paintings.VERSION, dependencies = "after:PaintingSelGui")
 public class Paintings {
@@ -32,8 +26,6 @@ public class Paintings {
     public static final String VERSION = "1.11.2-3.2.1.1";
     public static final String NAME = "Paintings++";
 
-    @SidedProxy(serverSide = "subaraki.paintings.mod.server.proxy.CommonProxy", clientSide = "subaraki.paintings.mod.client.proxy.ClientProxy")
-    public static CommonProxy proxy;
     public static Logger log;
 
     @EventHandler
@@ -47,30 +39,26 @@ public class Paintings {
         modMeta.description = "More Paintings! Check the config file for options.";
         modMeta.url = "http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1287285-/";
 
-        ConfigurationHandler.instance.loadConfig(event.getSuggestedConfigurationFile());
+        ConfigurationHandler.instance.patternsDirectory = new File(event.getModConfigurationDirectory(), MODID + "/patterns");
+        ConfigurationHandler.instance.configurationFile = event.getSuggestedConfigurationFile();
+        ConfigurationHandler.instance.loadConfig();
 
-        proxy.loadPatternDefinition();
-        proxy.registerRenderInformation();
+        PaintingsChannel.registerMessages();
+        MinecraftForge.EVENT_BUS.register(PaintingsEventHandler.class);
+
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+            RenderingRegistry.registerEntityRenderingHandler(EntityPainting.class, RenderPaintingLate::new);
+        }
     }
 
-    private PaintingsEventHandler eventHandler = new PaintingsEventHandler();
-    private class PaintingsEventHandler {
+    @EventHandler
+    public void serverStarting(FMLServerStartingEvent event) {
 
-        @SubscribeEvent
-        public void entityConstructingEvent(EntityConstructing event) {
-            // We only care about paintings
-            if (event.getEntity() instanceof EntityPainting) {
-                EntityPainting entity = (EntityPainting)event.getEntity();
-                entity.art = EntityPainting.EnumArt.values()[0];
-            }
+        if (PaintingsPattern.load(ConfigurationHandler.instance.texture)) {
+            PaintingsIgnore.ignoreVanillaPaintings();
+            PaintingsPattern.instance.parseJson();
         }
-
-        @SubscribeEvent
-        public void entityJoinWorldEvent(EntityJoinWorldEvent event) {
-            // We only care about paintings
-            if (event.getEntity() instanceof EntityPainting) {
-                log.info(event);
-            }
-        }
+        PaintingsIgnore.dumpEnumArt(Level.DEBUG);
     }
 }
+

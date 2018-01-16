@@ -91,35 +91,35 @@ public class RenderPaintingLate extends Render implements IRenderFactory {
                 BufferBuilder bufferbuilder = tessellator.getBuffer();
                 bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX_NORMAL);
                 // Front
-                bufferbuilder.pos(ltX1, ltY0, -z).tex(txX1, txY0).normal( 0, 0,-1).endVertex();
-                bufferbuilder.pos(ltX0, ltY0, -z).tex(txX0, txY0).normal( 0, 0,-1).endVertex();
-                bufferbuilder.pos(ltX0, ltY1, -z).tex(txX0, txY1).normal( 0, 0,-1).endVertex();
-                bufferbuilder.pos(ltX1, ltY1, -z).tex(txX1, txY1).normal( 0, 0,-1).endVertex();
+                bufferbuilder.pos(ltX1, ltY0, -z).tex(txX1, txY0).normal(0, 0, -1).endVertex();
+                bufferbuilder.pos(ltX0, ltY0, -z).tex(txX0, txY0).normal(0, 0, -1).endVertex();
+                bufferbuilder.pos(ltX0, ltY1, -z).tex(txX0, txY1).normal(0, 0, -1).endVertex();
+                bufferbuilder.pos(ltX1, ltY1, -z).tex(txX1, txY1).normal(0, 0, -1).endVertex();
                 // Back
-                bufferbuilder.pos(ltX1, ltY1,  z).tex(x0, y0).normal( 0, 0, 1).endVertex();
-                bufferbuilder.pos(ltX0, ltY1,  z).tex(x2, y0).normal( 0, 0, 1).endVertex();
-                bufferbuilder.pos(ltX0, ltY0,  z).tex(x2, y2).normal( 0, 0, 1).endVertex();
-                bufferbuilder.pos(ltX1, ltY0,  z).tex(x0, y2).normal( 0, 0, 1).endVertex();
+                bufferbuilder.pos(ltX1, ltY1, z).tex(x0, y0).normal(0, 0, 1).endVertex();
+                bufferbuilder.pos(ltX0, ltY1, z).tex(x2, y0).normal(0, 0, 1).endVertex();
+                bufferbuilder.pos(ltX0, ltY0, z).tex(x2, y2).normal(0, 0, 1).endVertex();
+                bufferbuilder.pos(ltX1, ltY0, z).tex(x0, y2).normal(0, 0, 1).endVertex();
                 // Top
-                bufferbuilder.pos(ltX1, ltY1, -z).tex(x0, y1).normal( 0, 1, 0).endVertex();
-                bufferbuilder.pos(ltX0, ltY1, -z).tex(x2, y1).normal( 0, 1, 0).endVertex();
-                bufferbuilder.pos(ltX0, ltY1,  z).tex(x2, y1).normal( 0, 1, 0).endVertex();
-                bufferbuilder.pos(ltX1, ltY1,  z).tex(x0, y1).normal( 0, 1, 0).endVertex();
+                bufferbuilder.pos(ltX1, ltY1, -z).tex(x0, y1).normal(0, 1, 0).endVertex();
+                bufferbuilder.pos(ltX0, ltY1, -z).tex(x2, y1).normal(0, 1, 0).endVertex();
+                bufferbuilder.pos(ltX0, ltY1, z).tex(x2, y1).normal(0, 1, 0).endVertex();
+                bufferbuilder.pos(ltX1, ltY1, z).tex(x0, y1).normal(0, 1, 0).endVertex();
                 // Bottom
-                bufferbuilder.pos(ltX1, ltY0,  z).tex(x0, y1).normal( 0,-1, 0).endVertex();
-                bufferbuilder.pos(ltX0, ltY0,  z).tex(x2, y1).normal( 0,-1, 0).endVertex();
-                bufferbuilder.pos(ltX0, ltY0, -z).tex(x2, y1).normal( 0,-1, 0).endVertex();
-                bufferbuilder.pos(ltX1, ltY0, -z).tex(x0, y1).normal( 0,-1, 0).endVertex();
+                bufferbuilder.pos(ltX1, ltY0, z).tex(x0, y1).normal(0, -1, 0).endVertex();
+                bufferbuilder.pos(ltX0, ltY0, z).tex(x2, y1).normal(0, -1, 0).endVertex();
+                bufferbuilder.pos(ltX0, ltY0, -z).tex(x2, y1).normal(0, -1, 0).endVertex();
+                bufferbuilder.pos(ltX1, ltY0, -z).tex(x0, y1).normal(0, -1, 0).endVertex();
                 // Left
-                bufferbuilder.pos(ltX1, ltY1,  z).tex(x1, y0).normal(-1, 0, 0).endVertex();
-                bufferbuilder.pos(ltX1, ltY0,  z).tex(x1, y2).normal(-1, 0, 0).endVertex();
+                bufferbuilder.pos(ltX1, ltY1, z).tex(x1, y0).normal(-1, 0, 0).endVertex();
+                bufferbuilder.pos(ltX1, ltY0, z).tex(x1, y2).normal(-1, 0, 0).endVertex();
                 bufferbuilder.pos(ltX1, ltY0, -z).tex(x1, y2).normal(-1, 0, 0).endVertex();
                 bufferbuilder.pos(ltX1, ltY1, -z).tex(x1, y0).normal(-1, 0, 0).endVertex();
                 // Right
-                bufferbuilder.pos(ltX0, ltY1, -z).tex(x1, y0).normal( 1, 0, 0).endVertex();
-                bufferbuilder.pos(ltX0, ltY0, -z).tex(x1, y2).normal( 1, 0, 0).endVertex();
-                bufferbuilder.pos(ltX0, ltY0,  z).tex(x1, y2).normal( 1, 0, 0).endVertex();
-                bufferbuilder.pos(ltX0, ltY1,  z).tex(x1, y0).normal( 1, 0, 0).endVertex();
+                bufferbuilder.pos(ltX0, ltY1, -z).tex(x1, y0).normal(1, 0, 0).endVertex();
+                bufferbuilder.pos(ltX0, ltY0, -z).tex(x1, y2).normal(1, 0, 0).endVertex();
+                bufferbuilder.pos(ltX0, ltY0, z).tex(x1, y2).normal(1, 0, 0).endVertex();
+                bufferbuilder.pos(ltX0, ltY1, z).tex(x1, y0).normal(1, 0, 0).endVertex();
                 tessellator.draw();
             }
         }
