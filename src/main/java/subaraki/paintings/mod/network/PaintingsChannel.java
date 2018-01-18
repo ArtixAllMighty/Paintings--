@@ -11,11 +11,9 @@ public class PaintingsChannel {
     public static void registerMessages() {
         int id = 0;
 
-        // Server->Client: PaintingsPattern object
-        channel.registerMessage(PaintingsPatternMessage.Handler.class, PaintingsPatternMessage.class, id++, Side.CLIENT);
-
-        // Named message handler
-        channel.registerMessage(PaintingsMessage.Handler.class, PaintingsMessage.class, id++, Side.SERVER);
+        // Server->Client
         channel.registerMessage(PaintingsMessage.Handler.class, PaintingsMessage.class, id++, Side.CLIENT);
+
+        // Client->Server (no messages implemented)
     }
 }

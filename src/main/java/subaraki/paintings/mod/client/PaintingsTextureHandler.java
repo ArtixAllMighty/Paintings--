@@ -5,6 +5,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import subaraki.paintings.config.ConfigurationHandler;
 import subaraki.paintings.mod.Paintings;
 import subaraki.paintings.mod.PaintingsPattern;
 
@@ -18,15 +19,16 @@ public class PaintingsTextureHandler {
     }
 
     @SideOnly(Side.CLIENT)
-    public static void loadPaintingsTexture() {
+    public static void updatePaintingGui() {
         final String CLASS_LOC = "com.mcf.davidee.paintinggui.gui.PaintingButton";
+        final PaintingsPattern pattern = ConfigurationHandler.getInstance().getPattern();
 
         // Replace texture used by Painting Gui Selection Revamped
         try {
             Class altClass = Class.forName(CLASS_LOC);
-            paintingGuiTextureHelper(altClass, "TEXTURE", new ResourceLocation("subaraki:art/" + PaintingsPattern.instance.getName() + ".png"));
-            paintingGuiHelper(altClass, "KZ_WIDTH", PaintingsPattern.instance.getSize().width * 16);
-            paintingGuiHelper(altClass, "KZ_HEIGHT", PaintingsPattern.instance.getSize().height * 16);
+            paintingGuiTextureHelper(altClass, "TEXTURE", new ResourceLocation("subaraki:art/" + pattern.getName() + ".png"));
+            paintingGuiHelper(altClass, "KZ_WIDTH", pattern.getSize().width * 16);
+            paintingGuiHelper(altClass, "KZ_HEIGHT", pattern.getSize().height * 16);
         } catch (Exception e) {
             Paintings.log.warn(e.getLocalizedMessage());
         }

@@ -1,22 +1,7 @@
 package subaraki.paintings.mod;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import net.minecraftforge.common.util.EnumHelper;
-import org.apache.commons.io.IOUtils;
-import subaraki.paintings.config.ConfigurationHandler;
 
-import java.io.BufferedReader;
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.*;
-import java.util.Collections;
 import java.util.HashMap;
 
 public class PaintingsPattern {
@@ -35,116 +20,24 @@ public class PaintingsPattern {
         }
     }
 
-    public static PaintingsPattern instance = null;
-
     private static Integer enumCounter = 0;
 
     private String type = "subaraki:pattern";
     private String name = null;
     private String[] pattern = null;
     private HashMap<String, Size> key = null;
-    private HashMap<Size, Number> sizeCounts = new HashMap<Size, Number>();
 
-
-    // Adapted from parseJsonRecipes() in CraftingManager.java
-    public static boolean load(String patternName) {
-        FileSystem filesystem = null;
-        boolean success = true;
-
-        final File configPatternFile = new File(ConfigurationHandler.instance.patternsDirectory, ConfigurationHandler.instance.texture + ".json");
-
-        final String assetsRoot = "/assets/subaraki";
-
-        try {
-            Path path = null;
-
-            if (configPatternFile.exists()) {
-                // A pattern file for the specified texture exists in the config/morepaintings/paintings folder
-                path = configPatternFile.toPath();
-            } else {
-                // Load file from resources
-                URL url = PaintingsPattern.class.getResource(assetsRoot);
-                if (url != null) {
-                    URI uri = url.toURI();
-                    String patternFilename = assetsRoot + "/patterns/" + patternName + ".json";
-
-                    // Generate path
-                    switch (uri.getScheme()) {
-                        case "file":
-                            path = Paths.get(PaintingsPattern.class.getResource(patternFilename).toURI());
-                            break;
-                        case "jar":
-                            filesystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
-                            path = filesystem.getPath(patternFilename);
-                            break;
-                        default:
-                            Paintings.log.error("Unsupported scheme " + uri + " trying to get " + patternName + " pattern");
-                            break;
-                    }
-                } else {
-
-                    Paintings.log.error("Couldn't find .mcassetsroot");
-                    success = false;
-
-                }
-            }
-
-            // Read in JSON
-            if (path != null) {
-
-                BufferedReader reader = null;
-
-                try {
-
-                    reader = Files.newBufferedReader(path);
-                    Gson gson = new Gson();
-                    JsonElement element = gson.fromJson(reader, JsonElement.class);
-                    JsonObject json = element.getAsJsonObject();
-
-                    PaintingsPattern.instance = gson.fromJson(json, PaintingsPattern.class);
-
-                } catch (JsonParseException e) {
-
-                    Paintings.log.error("Parsing error loading pattern " + patternName, (Throwable) e);
-                    success = false;
-
-                } catch (IOException e) {
-
-                    Paintings.log.error("Couldn't read pattern " + patternName + " from " + path, (Throwable) e);
-                    success = false;
-
-                } finally {
-
-                    IOUtils.closeQuietly(reader);
-
-                }
-            }
-
-        } catch (IOException | URISyntaxException urisyntaxexception) {
-
-            Paintings.log.error("Couldn't get a list of all recipe files", (Throwable) urisyntaxexception);
-            success = false;
-
-        } finally {
-
-            IOUtils.closeQuietly((Closeable) filesystem);
-
-        }
-
-        return success;
-    }
-
-    public void parseJson() {
+    public void parse() {
         Integer width = this.pattern[0].length();
         Integer height = this.pattern.length;
-        Integer count = 0;
+        HashMap<Size, Integer> sizeCounts = new HashMap<Size, Integer>();
 
         // Use a copy of the pattern so we can keep the original in memory
         String[] workingPattern = this.pattern.clone();
 
         // Initialize counters
         for (Size size : key.values()) {
-            this.sizeCounts.put(size, 0);
+            sizeCounts.put(size, 0);
         }
 
         // Iterate through symbols
@@ -159,8 +52,10 @@ public class PaintingsPattern {
                 Size size = this.key.get(symbol);
                 if (size != null) {
 
-                    this.addPainting(size, offsetX, offsetY);
-                    count++;
+                    // Keep separate counts for each distinct size
+                    Integer sizeCount = sizeCounts.get(size);
+                    this.addPainting(size, offsetX, offsetY, sizeCount);
+                    sizeCounts.put(size, ++sizeCount);
 
                     // Clear painting from the working pattern
                     if (workingPattern[offsetY].length() < offsetX + size.width) {
@@ -181,7 +76,7 @@ public class PaintingsPattern {
             }
         }
 
-        Paintings.log.info("Loaded pattern");
+        Paintings.log.info("Loaded {} pattern", this.name);
     }
 
     /**
@@ -203,22 +98,18 @@ public class PaintingsPattern {
     /**
      * Add a painting to Minecract from the pattern
      *
-     * @param size    Size in blocks
-     * @param offsetX Left offset in blocks
-     * @param offsetY Top offset in blocks
+     * @param size      Size in blocks
+     * @param offsetX   Left offset, in blocks, of the painting on the texture
+     * @param offsetY   Top offset, in blocks, of the painting on the texture
+     * @param sizeIndex A special discriminator that, along with the size, is used to uniquely identify a painting
      */
-    private void addPainting(Size size, Integer offsetX, Integer offsetY) {
-
-        // Keep separate counts for each distinct size
-        Number sizeCount = this.sizeCounts.get(size);
-        this.sizeCounts.put(size, sizeCount.intValue() + 1);
-
+    private void addPainting(Size size, Integer offsetX, Integer offsetY, Integer sizeIndex) {
         EnumHelper.addArt(
                 // Internal runtime field name, not used by the database
                 String.format("MOREPAINTINGS_%d", PaintingsPattern.enumCounter++),
 
                 // Identifies entity - this is what is stored in the region file
-                String.format("ptg_%d_%d_%d", size.width, size.height, sizeCount.intValue()),
+                String.format("ptg_%d_%d_%d", size.width, size.height, sizeIndex),
 
                 // Size and position of sprite on sprite sheet
                 size.width * 16,

@@ -1,21 +1,18 @@
 package subaraki.paintings.mod;
 
-import net.minecraft.entity.item.EntityPainting;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.ModMetadata;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import org.apache.logging.log4j.Level;
+import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.Logger;
 import subaraki.paintings.config.ConfigurationHandler;
-import subaraki.paintings.mod.client.RenderPaintingLate;
+import subaraki.paintings.mod.client.PaintingsTextureHandler;
 import subaraki.paintings.mod.network.PaintingsChannel;
 
-import java.io.File;
 import java.util.Collections;
 
 
@@ -23,7 +20,7 @@ import java.util.Collections;
 public class Paintings {
 
     public static final String MODID = "morepaintings";
-    public static final String VERSION = "1.11.2-3.2.1.1";
+    public static final String VERSION = "1.11.2-3.3.0.0";
     public static final String NAME = "Paintings++";
 
     public static Logger log;
@@ -39,26 +36,20 @@ public class Paintings {
         modMeta.description = "More Paintings! Check the config file for options.";
         modMeta.url = "http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1287285-/";
 
-        ConfigurationHandler.instance.patternsDirectory = new File(event.getModConfigurationDirectory(), MODID + "/patterns");
-        ConfigurationHandler.instance.configurationFile = event.getSuggestedConfigurationFile();
-        ConfigurationHandler.instance.loadConfig();
+        ConfigurationHandler.getInstance().preInit(event);
 
         PaintingsChannel.registerMessages();
         MinecraftForge.EVENT_BUS.register(PaintingsEventHandler.class);
 
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            RenderingRegistry.registerEntityRenderingHandler(EntityPainting.class, RenderPaintingLate::new);
+            PaintingsTextureHandler.registerRenderInformation();
         }
     }
 
     @EventHandler
     public void serverStarting(FMLServerStartingEvent event) {
-
-        if (PaintingsPattern.load(ConfigurationHandler.instance.texture)) {
-            PaintingsIgnore.ignoreVanillaPaintings();
-            PaintingsPattern.instance.parseJson();
-        }
-        PaintingsIgnore.dumpEnumArt(Level.DEBUG);
+        ConfigurationHandler.getInstance().loadPatternSource(Side.SERVER);
     }
+
 }
 

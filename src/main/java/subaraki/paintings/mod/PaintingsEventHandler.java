@@ -1,38 +1,33 @@
 package subaraki.paintings.mod;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.item.EntityPainting;
-import net.minecraftforge.event.entity.EntityEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
+import subaraki.paintings.config.ConfigurationHandler;
 import subaraki.paintings.mod.network.PaintingsChannel;
 import subaraki.paintings.mod.network.PaintingsMessage;
 
 public class PaintingsEventHandler {
 
     @SubscribeEvent
-    public void entityConstructingEvent(EntityEvent.EntityConstructing event) {
-        // We only care about paintings
-        if (event.getEntity() instanceof EntityPainting) {
-            EntityPainting entity = (EntityPainting) event.getEntity();
-            entity.art = EntityPainting.EnumArt.values()[0];
-        }
-    }
+    public static void playerLoggedInEvent(PlayerEvent.PlayerLoggedInEvent event) {
 
-    @SubscribeEvent
-    public void entityJoinWorldEvent(EntityJoinWorldEvent event) {
-        // We only care about paintings
-        if (event.getEntity() instanceof EntityPainting) {
-            Paintings.log.info(event);
-        }
-    }
+        if (event.player instanceof EntityPlayerMP) {
+            EntityPlayerMP player = (EntityPlayerMP) event.player;
+            String patternSource = ConfigurationHandler.getInstance().getPatternSource();
 
-    @SubscribeEvent
-    public static void clientConnectedToServerEvent(FMLNetworkEvent.ClientConnectedToServerEvent event) {
-        Minecraft.getMinecraft().addScheduledTask(() -> {
-            PaintingsMessage message = new PaintingsMessage(PaintingsMessage.MessageType.REQ_PATTERN);
-            PaintingsChannel.channel.sendToServer(message);
-        });
+            if (patternSource != null) {
+                player.getServerWorld().addScheduledTask(() -> {
+                    PaintingsMessage message = new PaintingsMessage(PaintingsMessage.MessageType.PATTERN_JSON, patternSource);
+                    PaintingsChannel.channel.sendTo(message, player);
+                });
+            } else {
+                // The server in Single Player doesn't read the pattern
+                player.getServerWorld().addScheduledTask(() -> {
+                    PaintingsMessage message = new PaintingsMessage(PaintingsMessage.MessageType.PATTERN_NULL);
+                    PaintingsChannel.channel.sendTo(message, player);
+                });
+            }
+        }
     }
 }
