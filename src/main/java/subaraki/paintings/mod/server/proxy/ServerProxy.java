@@ -5,6 +5,8 @@ import subaraki.paintings.config.ConfigurationHandler;
 import subaraki.paintings.mod.CommonProxy;
 
 public class ServerProxy extends CommonProxy {
+
+    @Override
     public void loadPattern() {
         ConfigurationHandler.getInstance().loadPatternSource(Side.SERVER);
     }
