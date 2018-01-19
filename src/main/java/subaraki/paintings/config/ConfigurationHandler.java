@@ -77,7 +77,7 @@ public class ConfigurationHandler {
 
         PaintingsUtilities.ignoreVanillaPaintings();
         this.pattern.parse();
-        PaintingsUtilities.dumpEnumArt(Level.DEBUG);
+        PaintingsUtilities.debugDumpEnumArt(Level.DEBUG);
     }
 
     /**

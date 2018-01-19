@@ -6,10 +6,11 @@ import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import subaraki.paintings.config.ConfigurationHandler;
 import subaraki.paintings.mod.CommonProxy;
-import subaraki.paintings.mod.Paintings;
+import subaraki.paintings.mod.PaintingsUtilities;
 import subaraki.paintings.mod.client.PaintingsTextureHandler;
 import subaraki.paintings.mod.client.RenderPaintingLate;
 import subaraki.paintings.mod.network.PaintingsMessage;
+import org.apache.logging.log4j.Level;
 
 public class ClientProxy extends CommonProxy {
 
@@ -20,6 +21,8 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public void handlePatternMessage(PaintingsMessage message) {
+        PaintingsUtilities.debugDumpClass(Level.INFO, Minecraft.class);
+
         Minecraft.getMinecraft().addScheduledTask(() -> {
             ConfigurationHandler.getInstance().setPattern(new String(message.payload));
             PaintingsTextureHandler.updatePaintingGui();
