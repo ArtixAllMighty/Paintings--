@@ -1,13 +1,11 @@
 package subaraki.paintings.mod;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.item.EntityPainting;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.Level;
+
+import java.lang.reflect.Method;
 
 public class PaintingsUtilities {
     /**

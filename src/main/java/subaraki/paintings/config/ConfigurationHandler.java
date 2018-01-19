@@ -6,26 +6,22 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.client.resources.IResource;
 import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.server.FMLServerHandler;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Level;
 import subaraki.paintings.mod.Paintings;
 import subaraki.paintings.mod.PaintingsPattern;
 import subaraki.paintings.mod.PaintingsUtilities;
-import subaraki.paintings.mod.client.RenderPaintingLate;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.MissingResourceException;
 
 import static subaraki.paintings.mod.Paintings.MODID;
 

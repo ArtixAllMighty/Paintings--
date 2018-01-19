@@ -1,16 +1,14 @@
 package subaraki.paintings.mod;
 
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.ModMetadata;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.Logger;
 import subaraki.paintings.config.ConfigurationHandler;
-import subaraki.paintings.mod.client.PaintingsTextureHandler;
 import subaraki.paintings.mod.network.PaintingsChannel;
 
 import java.util.Collections;
@@ -20,8 +18,12 @@ import java.util.Collections;
 public class Paintings {
 
     public static final String MODID = "morepaintings";
-    public static final String VERSION = "1.11.2-3.3.0.0";
+    public static final String VERSION = "1.12-3.3.0.0";
     public static final String NAME = "Paintings++";
+
+    @SidedProxy(serverSide = "subaraki.paintings.mod.server.proxy.ServerProxy", clientSide = "subaraki.paintings.mod.client.proxy.ClientProxy")
+    public static CommonProxy proxy;
+    private static final String CLASS_LOC = "com.mcf.davidee.paintinggui.gui.PaintingButton";
 
     public static Logger log;
 
@@ -41,14 +43,12 @@ public class Paintings {
         PaintingsChannel.registerMessages();
         MinecraftForge.EVENT_BUS.register(PaintingsEventHandler.class);
 
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            PaintingsTextureHandler.registerRenderInformation();
-        }
+        proxy.registerRenderInformation();
     }
 
     @EventHandler
-    public void serverStarting(FMLServerStartingEvent event) {
-        ConfigurationHandler.getInstance().loadPatternSource(Side.SERVER);
+    public void init(FMLInitializationEvent event) {
+        proxy.loadPattern();
     }
 
 }

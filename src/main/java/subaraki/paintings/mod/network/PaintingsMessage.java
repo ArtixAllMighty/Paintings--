@@ -1,15 +1,10 @@
 package subaraki.paintings.mod.network;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
-import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import subaraki.paintings.config.ConfigurationHandler;
-import subaraki.paintings.mod.client.PaintingsTextureHandler;
-import subaraki.paintings.mod.client.RenderPaintingLate;
+import subaraki.paintings.mod.Paintings;
 
 import java.nio.charset.Charset;
 
@@ -65,29 +60,21 @@ public class PaintingsMessage implements IMessage {
 
     public static class Handler implements IMessageHandler<PaintingsMessage, IMessage> {
 
-        public Handler() {
-        }
+        public Handler() {}
 
         @Override
         public IMessage onMessage(PaintingsMessage message, MessageContext context) {
 
-            if (context.side.isClient()) {
-                Minecraft mainThread = Minecraft.getMinecraft();
-
-                if (message.type == MessageType.PATTERN_JSON) {
-                    mainThread.addScheduledTask(() -> {
-                            ConfigurationHandler.getInstance().setPattern(new String(message.payload));
-                            PaintingsTextureHandler.updatePaintingGui();
-                            RenderPaintingLate.resetTexture();
-                    });
-                } else if (message.type == MessageType.PATTERN_NULL) {
-                    // The server in Single Player doesn't read the pattern
-                    mainThread.addScheduledTask(() -> {
-                            ConfigurationHandler.getInstance().loadPatternSource(Side.CLIENT);
-                            PaintingsTextureHandler.updatePaintingGui();
-                            RenderPaintingLate.resetTexture();
-                    });
-                }
+            switch (message.type) {
+                case PATTERN_JSON:
+                    Paintings.proxy.handlePatternMessage(message);
+                    break;
+                case PATTERN_NULL:
+                    Paintings.proxy.handleEmptyPatternMessage();
+                    break;
+                default:
+                    // Should we throw an error or something?
+                    break;
             }
 
             return null;
