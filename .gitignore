@@ -22,3 +22,11 @@ eclipse
 run
 *.txt
 .vscode
+/config/
+/logs/
+/mods/
+/resourcepacks/
+/saves/
+/world/
+*.json
+*.properties
