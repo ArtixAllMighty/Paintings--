@@ -18,7 +18,7 @@ import java.util.Collections;
 public class Paintings {
 
     public static final String MODID = "morepaintings";
-    public static final String VERSION = "1.12-3.3.0.0";
+    public static final String VERSION = "$version";
     public static final String NAME = "Paintings++";
 
     @SidedProxy(serverSide = "subaraki.paintings.mod.server.proxy.ServerProxy", clientSide = "subaraki.paintings.mod.client.proxy.ClientProxy")
