@@ -1,5 +1,6 @@
 package subaraki.paintings.mod;
 
+import net.minecraft.entity.item.EntityPainting;
 import net.minecraftforge.common.util.EnumHelper;
 
 import java.util.HashMap;
@@ -104,9 +105,17 @@ public class PaintingsPattern {
      * @param sizeIndex A special discriminator that, along with the size, is used to uniquely identify a painting
      */
     private void addPainting(Size size, Integer offsetX, Integer offsetY, Integer sizeIndex) {
+        final String paintingName = String.format("MOREPAINTINGS_%d", PaintingsPattern.enumCounter++);
+
+        // Try updating an existing enum
+        boolean existed = false;
+        for (EntityPainting.EnumArt art : EntityPainting.EnumArt.values()) {
+
+        }
+
         EnumHelper.addArt(
                 // Internal runtime field name, not used by the database
-                String.format("MOREPAINTINGS_%d", PaintingsPattern.enumCounter++),
+                paintingName,
 
                 // Identifies entity - this is what is stored in the region file
                 String.format("ptg_%d_%d_%d", size.width, size.height, sizeIndex),

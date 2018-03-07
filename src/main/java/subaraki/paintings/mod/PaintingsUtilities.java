@@ -26,19 +26,13 @@ public class PaintingsUtilities {
      * @param level The logging level to dump to.
      */
     public static void debugDumpEnumArt(Level level) {
-        for (EntityPainting.EnumArt art : EntityPainting.EnumArt.values()) {
-            String output = String.format("%s(\"%s\", %d, %d, %d, %d)", art.name(), art.title, art.sizeX, art.sizeY, art.offsetX, art.offsetY);
-            Paintings.log.log(level, output);
-        }
-    }
-
-    public static void debugDumpClass(Level level, Class c) {
         StringBuilder builder = new StringBuilder();
-        builder.append("class " + c.getName() + " {\n");
-        for (Method method : c.getMethods()) {
-            builder.append("    " + method.toString() + ";\n");
+        builder.append("enum EntityPainting.EnumArt {");
+        for (EntityPainting.EnumArt art : EntityPainting.EnumArt.values()) {
+            builder.append(String.format("\n    %s(\"%s\", %d, %d, %d, %d),", art.name(), art.title, art.sizeX, art.sizeY, art.offsetX, art.offsetY));
         }
-        builder.append("}\n");
-        Paintings.log.log(level, builder.toString());
+        Integer offset = builder.length() - 1;
+        builder.replace(offset, offset, "\n}\n");
+        Paintings.log.log(level, builder);
     }
 }

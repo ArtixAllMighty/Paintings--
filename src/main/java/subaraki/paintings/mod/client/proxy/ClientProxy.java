@@ -21,8 +21,6 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public void handlePatternMessage(PaintingsMessage message) {
-        PaintingsUtilities.debugDumpClass(Level.INFO, Minecraft.class);
-
         Minecraft.getMinecraft().addScheduledTask(() -> {
             ConfigurationHandler.getInstance().setPattern(new String(message.payload));
             PaintingsTextureHandler.updatePaintingGui();

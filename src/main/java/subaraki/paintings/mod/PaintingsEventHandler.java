@@ -19,12 +19,12 @@ public class PaintingsEventHandler {
             String patternSource = ConfigurationHandler.getInstance().getPatternSource();
 
             if (patternSource != null) {
-                Paintings.log.info("Sending message PATTERN_JSON from {}", FMLCommonHandler.instance().getEffectiveSide().toString());
+                Paintings.log.debug("Sending message PATTERN_JSON from {}", FMLCommonHandler.instance().getEffectiveSide().toString());
                 PaintingsMessage message = new PaintingsMessage(PaintingsMessage.MessageType.PATTERN_JSON, patternSource);
                 PaintingsChannel.channel.sendTo(message, player);
             } else {
                 // The server in Single Player doesn't read the pattern
-                Paintings.log.info("Sending message PATTERN_NULL from {}", FMLCommonHandler.instance().getEffectiveSide().toString());
+                Paintings.log.debug("Sending message PATTERN_NULL from {}", FMLCommonHandler.instance().getEffectiveSide().toString());
                 PaintingsMessage message = new PaintingsMessage(PaintingsMessage.MessageType.PATTERN_NULL);
                 PaintingsChannel.channel.sendTo(message, player);
             }
